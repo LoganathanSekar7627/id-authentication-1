@@ -85,7 +85,7 @@ public class IdRepoManagerTest {
 		Mockito.when(restRequestFactory.buildRequest(RestServicesConstants.ID_REPO_SERVICE_WITHOUT_TYPE, null, Map.class))
 				.thenReturn(restRequestDTO);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenReturn(finalMap);
-		Mockito.when(idReposerviceImpl.getIdenity("76746685", false)).thenReturn(response);
+		Mockito.when(idReposerviceImpl.getIdentity("76746685", false)).thenReturn(response);
 		assertNotNull(response);
 	}
 
@@ -95,7 +95,7 @@ public class IdRepoManagerTest {
 
 		Mockito.when(restRequestFactory.buildRequest(RestServicesConstants.ID_REPO_SERVICE_WITHOUT_TYPE, null, Map.class))
 				.thenThrow(new IDDataValidationException(IdAuthenticationErrorConstants.SERVER_ERROR));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class IdRepoManagerTest {
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenReturn(finalMap);
 		try
 		{
-			idReposerviceImpl.getIdenity("76746685", false);
+			idReposerviceImpl.getIdentity("76746685", false);
 		}
 		catch(IdAuthenticationBusinessException ex) {
 			  assertEquals(IdAuthenticationErrorConstants.UIN_DEACTIVATED.getErrorCode(), ex.getErrorCode());
@@ -129,7 +129,7 @@ public class IdRepoManagerTest {
 				.thenReturn(restRequestDTO);
 		Mockito.when(restHelper.requestSync(Mockito.any()))
 				.thenThrow(new RestServiceException(IdAuthenticationErrorConstants.SERVER_ERROR));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 	
 	
@@ -141,7 +141,7 @@ public class IdRepoManagerTest {
 				.thenReturn(restRequestDTO);
 		Mockito.when(restHelper.requestSync(Mockito.any()))
 				.thenThrow(new RestServiceException(IdAuthenticationErrorConstants.SERVER_ERROR));
-		idReposerviceImpl.getIdenity("76746685", true);
+		idReposerviceImpl.getIdentity("76746685", true);
 	}
 
 	@Test(expected = IdAuthenticationBusinessException.class)
@@ -157,7 +157,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class IdRepoManagerTest {
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
 		try
 		{
-			idReposerviceImpl.getIdenity("76746685", false);
+			idReposerviceImpl.getIdentity("76746685", false);
 		}
 		catch(IdAuthenticationBusinessException ex) {
 			  assertEquals(IdAuthenticationErrorConstants.INVALID_UIN.getErrorCode(), ex.getErrorCode());
@@ -196,7 +196,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 
 	@Test(expected = IdAuthenticationBusinessException.class)
@@ -209,7 +209,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 
 	@Test(expected = IdAuthenticationBusinessException.class)
@@ -219,7 +219,7 @@ public class IdRepoManagerTest {
 				.thenReturn(restRequestDTO);
 		Mockito.when(restHelper.requestSync(Mockito.any()))
 				.thenThrow(new RestServiceException(IdAuthenticationErrorConstants.UIN_DEACTIVATED));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 	
 	
@@ -233,7 +233,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors1", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 	
 	
@@ -247,7 +247,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 	
 	
@@ -264,7 +264,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 	
 	
@@ -281,7 +281,7 @@ public class IdRepoManagerTest {
 		responseBody.put("errors", valuelist);
 		Mockito.when(restHelper.requestSync(Mockito.any())).thenThrow(new RestServiceException(
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
-		idReposerviceImpl.getIdenity("76746685", false);
+		idReposerviceImpl.getIdentity("76746685", false);
 	}
 	
 	/* this test method tests the positive scenario
@@ -591,7 +591,7 @@ public class IdRepoManagerTest {
 				IdAuthenticationErrorConstants.INVALID_UIN, responseBody.toString(), (Object) responseBody));
 		try
 		{
-		 idReposerviceImpl.getIdenity("234433356", false);
+		 idReposerviceImpl.getIdentity("234433356", false);
 		}
 		catch(IdAuthenticationBusinessException ex) {
 			  assertEquals(IdAuthenticationErrorConstants.VID_DEACTIVATED_UIN.getErrorCode(), ex.getErrorCode());

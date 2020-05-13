@@ -69,7 +69,7 @@ public class IdServiceImpl implements IdService<AutnTxn> {
 	 */
 	@Override
 	public Map<String, Object> getIdByUin(String uin, boolean isBio) throws IdAuthenticationBusinessException {
-		return idRepoManager.getIdenity(uin, isBio);
+		return idRepoManager.getIdentity(uin, isBio);
 	}
 
 	/*
@@ -81,7 +81,7 @@ public class IdServiceImpl implements IdService<AutnTxn> {
 	 */
 	@Override
 	public Map<String, Object> getIdByVid(String vid, boolean isBio) throws IdAuthenticationBusinessException {
-		return idRepoManager.getIdenity(vid, isBio);
+		return idRepoManager.getIdentity(vid, isBio);
 	}
 
 	/**

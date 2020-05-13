@@ -2,15 +2,20 @@ package io.mosip.authentication.common.service.integration;
 
 import static io.mosip.authentication.core.constant.IdAuthCommonConstants.KER_USER_ID_NOTEXIST_ERRORCODE;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,16 +38,19 @@ import io.mosip.idrepository.core.constant.IdRepoConstants;
 import io.mosip.idrepository.core.constant.IdRepoErrorConstants;
 import io.mosip.idrepository.core.dto.BaseRequestResponseDTO;
 import io.mosip.idrepository.core.dto.DocumentsDTO;
+import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.CryptoUtil;
+import io.mosip.kernel.core.util.DateUtils;
 
-/*
+/**
  * Fetch data's and manages entity info's from ID Repository
  * 
  * @author Dinesh Karuppiah.T
+ * @author Manoj SP
+ *
  */
-
 @Component
 public class IdRepoManager {
 
@@ -88,16 +96,28 @@ public class IdRepoManager {
 	 * @throws IdAuthenticationBusinessException
 	 *             the id authentication business exception
 	 */
-	public Map<String, Object> getIdenity(String id, boolean isBio) throws IdAuthenticationBusinessException {
+	public Map<String, Object> getIdentity(String id, boolean isBio) throws IdAuthenticationBusinessException {
 		try {
 			IdentityEntity entity = null;
 			if (!identityRepo.existsById(id)) {
-				throw new IdAuthenticationBusinessException(IdAuthenticationErrorConstants.UIN_DEACTIVATED);
+				logger.error(IdAuthCommonConstants.SESSION_ID, this.getClass().getSimpleName(), "getIdentity",
+						"Id not found in DB");
+				throw new IdAuthenticationBusinessException(
+						IdAuthenticationErrorConstants.ID_NOT_AVAILABLE.getErrorCode(),
+						String.format(IdAuthenticationErrorConstants.ID_NOT_AVAILABLE.getErrorMessage(),
+								IdType.UIN.getType()));
 			}
+			
 			if (isBio) {
 				entity = identityRepo.getOne(id);
 			} else {
 				entity = identityRepo.findDemoDataById(id);
+			}
+
+			if (DateUtils.before(entity.getExpiryTimestamp(), DateUtils.getUTCCurrentDateTime())) {
+				logger.error(IdAuthCommonConstants.SESSION_ID, this.getClass().getSimpleName(), "getIdentity",
+						"Id expired");
+				throw new IdAuthenticationBusinessException(IdAuthenticationErrorConstants.UIN_DEACTIVATED);
 			}
 
 			ResponseWrapper<BaseRequestResponseDTO> responseWrapper = new ResponseWrapper<>();
@@ -111,8 +131,9 @@ public class IdRepoManager {
 			responseWrapper.setResponse(response);
 			return mapper.convertValue(responseWrapper, new TypeReference<Map<String, Object>>() {
 			});
-		} catch (Exception e) {
-			// TODO: Handle Exceptions
+		} catch (IOException | DataAccessException | TransactionException | JDBCConnectionException e) {
+			logger.error(IdAuthCommonConstants.SESSION_ID, this.getClass().getSimpleName(), "getIdentity",
+					ExceptionUtils.getStackTrace(e));
 			throw new IdAuthenticationBusinessException(IdAuthenticationErrorConstants.UNABLE_TO_PROCESS, e);
 		}
 	}
@@ -237,7 +258,7 @@ public class IdRepoManager {
 	}
 
 	/**
-	 * Update VI dstatus.
+	 * Update VID dstatus.
 	 *
 	 * @param vid
 	 *            the vid
@@ -245,7 +266,7 @@ public class IdRepoManager {
 	 *             the id authentication business exception
 	 */
 	public void updateVIDstatus(String vid) throws IdAuthenticationBusinessException {
-		if (identityRepo.existsById(vid)) {
+		if (identityRepo.existsById(vid) && Objects.nonNull(identityRepo.getOne(vid).getTransactionLimit())) {
 			identityRepo.deleteById(vid);
 		}
 	}
