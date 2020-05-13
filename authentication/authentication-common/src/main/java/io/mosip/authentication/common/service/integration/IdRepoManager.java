@@ -266,8 +266,15 @@ public class IdRepoManager {
 	 *             the id authentication business exception
 	 */
 	public void updateVIDstatus(String vid) throws IdAuthenticationBusinessException {
-		if (identityRepo.existsById(vid) && Objects.nonNull(identityRepo.getOne(vid).getTransactionLimit())) {
-			identityRepo.deleteById(vid);
+		try {
+			if (identityRepo.existsById(vid) && Objects.nonNull(identityRepo.getOne(vid).getTransactionLimit())) {
+				identityRepo.deleteById(vid);
+			}
+
+		} catch (DataAccessException | TransactionException | JDBCConnectionException e) {
+			logger.error(IdAuthCommonConstants.SESSION_ID, this.getClass().getSimpleName(), "getIdentity",
+					ExceptionUtils.getStackTrace(e));
+			throw new IdAuthenticationBusinessException(IdAuthenticationErrorConstants.UNABLE_TO_PROCESS, e);
 		}
 	}
 }
