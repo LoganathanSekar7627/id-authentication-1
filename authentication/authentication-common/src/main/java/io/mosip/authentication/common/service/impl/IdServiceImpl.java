@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import io.mosip.authentication.common.service.entity.AutnTxn;
@@ -46,11 +45,6 @@ public class IdServiceImpl implements IdService<AutnTxn> {
 	/** The autntxnrepository. */
 	@Autowired
 	private AutnTxnRepository autntxnrepository;
-	
-	
-	/** The env. */
-	@Autowired
-	private Environment env;
 
 	/*
 	 * To get Identity data from IDRepo based on UIN
