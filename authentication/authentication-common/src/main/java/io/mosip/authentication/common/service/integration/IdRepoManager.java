@@ -24,6 +24,7 @@ import io.mosip.authentication.common.service.entity.IdentityEntity;
 import io.mosip.authentication.common.service.factory.RestRequestFactory;
 import io.mosip.authentication.common.service.helper.RestHelper;
 import io.mosip.authentication.common.service.repository.IdentityCacheRepository;
+import io.mosip.authentication.common.service.transaction.manager.IdAuthSecurityManager;
 import io.mosip.authentication.core.constant.IdAuthCommonConstants;
 import io.mosip.authentication.core.constant.IdAuthConfigKeyConstants;
 import io.mosip.authentication.core.constant.IdAuthenticationErrorConstants;
@@ -34,6 +35,7 @@ import io.mosip.authentication.core.exception.IdAuthenticationBusinessException;
 import io.mosip.authentication.core.exception.RestServiceException;
 import io.mosip.authentication.core.indauth.dto.IdType;
 import io.mosip.authentication.core.logger.IdaLogger;
+import io.mosip.authentication.core.spi.id.service.IdService;
 import io.mosip.idrepository.core.constant.IdRepoConstants;
 import io.mosip.idrepository.core.constant.IdRepoErrorConstants;
 import io.mosip.idrepository.core.dto.BaseRequestResponseDTO;
@@ -85,6 +87,9 @@ public class IdRepoManager {
 	@Autowired
 	private ObjectMapper mapper;
 
+	@Autowired
+	private IdAuthSecurityManager securityManager;
+
 	/**
 	 * Fetch data from Id Repo based on Individual's UIN / VID value and all UIN.
 	 *
@@ -107,14 +112,15 @@ public class IdRepoManager {
 						String.format(IdAuthenticationErrorConstants.ID_NOT_AVAILABLE.getErrorMessage(),
 								IdType.UIN.getType()));
 			}
-			
+
 			if (isBio) {
-				entity = identityRepo.getOne(id);
+				entity = identityRepo.getOne(securityManager.hash(id));
 			} else {
-				entity = identityRepo.findDemoDataById(id);
+				entity = identityRepo.findDemoDataById(securityManager.hash(id));
 			}
 
-			if (DateUtils.before(entity.getExpiryTimestamp(), DateUtils.getUTCCurrentDateTime())) {
+			if (Objects.nonNull(entity.getExpiryTimestamp())
+					&& DateUtils.before(entity.getExpiryTimestamp(), DateUtils.getUTCCurrentDateTime())) {
 				logger.error(IdAuthCommonConstants.SESSION_ID, this.getClass().getSimpleName(), "getIdentity",
 						"Id expired");
 				throw new IdAuthenticationBusinessException(IdAuthenticationErrorConstants.UIN_DEACTIVATED);
@@ -267,8 +273,12 @@ public class IdRepoManager {
 	 */
 	public void updateVIDstatus(String vid) throws IdAuthenticationBusinessException {
 		try {
-			if (identityRepo.existsById(vid) && Objects.nonNull(identityRepo.getOne(vid).getTransactionLimit())) {
-				identityRepo.deleteById(vid);
+
+			// Assumption : If transactionLimit is null, id is considered as Perpetual VID
+			// If transactionLimit is nonNull, id is considered as Temporary VID
+			if (identityRepo.existsById(securityManager.hash(vid))
+					&& Objects.nonNull(identityRepo.getOne(vid).getTransactionLimit())) {
+				identityRepo.deleteById(securityManager.hash(vid));
 			}
 
 		} catch (DataAccessException | TransactionException | JDBCConnectionException e) {
