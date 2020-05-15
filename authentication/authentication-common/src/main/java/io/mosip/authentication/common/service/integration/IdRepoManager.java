@@ -107,11 +107,11 @@ public class IdRepoManager {
 	 */
 	public Map<String, Object> getIdentity(String id, boolean isBio, IdType idType) throws IdAuthenticationBusinessException {
 		
-		id = securityManager.hash(id);
+		String hashedId = securityManager.hash(id);
 		
 		try {
 			IdentityEntity entity = null;
-			if (!identityRepo.existsById(id)) {
+			if (!identityRepo.existsById(hashedId)) {
 				logger.error(IdAuthCommonConstants.SESSION_ID, this.getClass().getSimpleName(), "getIdentity",
 						"Id not found in DB");
 				throw new IdAuthenticationBusinessException(
@@ -121,13 +121,13 @@ public class IdRepoManager {
 			}
 
 			if (isBio) {
-				entity = identityRepo.getOne(securityManager.hash(id));
+				entity = identityRepo.getOne(hashedId);
 			} else {
-				Object[] data = identityRepo.findDemoDataById(id).get(0);
+				Object[] data = identityRepo.findDemoDataById(hashedId).get(0);
 				entity = new IdentityEntity();
 				entity.setId(String.valueOf(data[0]));
 				entity.setDemographicData((byte[]) data[1]);
-				entity.setExpiryTimestamp(LocalDateTime.parse(String.valueOf(data[2])));
+				entity.setExpiryTimestamp(Objects.nonNull(data[2]) ? LocalDateTime.parse(String.valueOf(data[2])) : null);
 				entity.setTransactionLimit(Objects.nonNull(data[3]) ? Integer.parseInt(String.valueOf(data[3])) : null);
 			}
 
