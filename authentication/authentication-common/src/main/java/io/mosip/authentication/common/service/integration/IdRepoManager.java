@@ -3,6 +3,7 @@ package io.mosip.authentication.common.service.integration;
 import static io.mosip.authentication.core.constant.IdAuthCommonConstants.KER_USER_ID_NOTEXIST_ERRORCODE;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -89,6 +90,10 @@ public class IdRepoManager {
 	@Autowired
 	private IdAuthSecurityManager securityManager;
 
+  public Map<String, Object> getIdentity(String id, boolean isBio) throws IdAuthenticationBusinessException {
+		return getIdentity(id, isBio, IdType.UIN);
+	}
+
 	/**
 	 * Fetch data from Id Repo based on Individual's UIN / VID value and all UIN.
 	 *
@@ -100,7 +105,10 @@ public class IdRepoManager {
 	 * @throws IdAuthenticationBusinessException
 	 *             the id authentication business exception
 	 */
-	public Map<String, Object> getIdentity(String id, boolean isBio) throws IdAuthenticationBusinessException {
+	public Map<String, Object> getIdentity(String id, boolean isBio, IdType idType) throws IdAuthenticationBusinessException {
+		
+		id = securityManager.hash(id);
+		
 		try {
 			IdentityEntity entity = null;
 			if (!identityRepo.existsById(id)) {
@@ -109,13 +117,18 @@ public class IdRepoManager {
 				throw new IdAuthenticationBusinessException(
 						IdAuthenticationErrorConstants.ID_NOT_AVAILABLE.getErrorCode(),
 						String.format(IdAuthenticationErrorConstants.ID_NOT_AVAILABLE.getErrorMessage(),
-								IdType.UIN.getType()));
+								idType.getType()));
 			}
 
 			if (isBio) {
 				entity = identityRepo.getOne(securityManager.hash(id));
 			} else {
-				entity = identityRepo.findDemoDataById(securityManager.hash(id));
+				Object[] data = identityRepo.findDemoDataById(id).get(0);
+				entity = new IdentityEntity();
+				entity.setId(String.valueOf(data[0]));
+				entity.setDemographicData((byte[]) data[1]);
+				entity.setExpiryTimestamp(LocalDateTime.parse(String.valueOf(data[2])));
+				entity.setTransactionLimit(Objects.nonNull(data[3]) ? Integer.parseInt(String.valueOf(data[3])) : null);
 			}
 
 			if (Objects.nonNull(entity.getExpiryTimestamp())
@@ -272,12 +285,12 @@ public class IdRepoManager {
 	 */
 	public void updateVIDstatus(String vid) throws IdAuthenticationBusinessException {
 		try {
-
+			vid = securityManager.hash(vid);
 			// Assumption : If transactionLimit is null, id is considered as Perpetual VID
 			// If transactionLimit is nonNull, id is considered as Temporary VID
-			if (identityRepo.existsById(securityManager.hash(vid))
+			if (identityRepo.existsById(vid)
 					&& Objects.nonNull(identityRepo.getOne(vid).getTransactionLimit())) {
-				identityRepo.deleteById(securityManager.hash(vid));
+				identityRepo.deleteById(vid);
 			}
 
 		} catch (DataAccessException | TransactionException | JDBCConnectionException e) {
