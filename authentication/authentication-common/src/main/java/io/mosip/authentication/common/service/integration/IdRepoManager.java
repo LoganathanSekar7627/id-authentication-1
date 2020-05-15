@@ -89,8 +89,8 @@ public class IdRepoManager {
 
 	@Autowired
 	private IdAuthSecurityManager securityManager;
-	
-	public Map<String, Object> getIdentity(String id, boolean isBio) throws IdAuthenticationBusinessException {
+
+  public Map<String, Object> getIdentity(String id, boolean isBio) throws IdAuthenticationBusinessException {
 		return getIdentity(id, isBio, IdType.UIN);
 	}
 
@@ -121,7 +121,7 @@ public class IdRepoManager {
 			}
 
 			if (isBio) {
-				entity = identityRepo.getOne(id);
+				entity = identityRepo.getOne(securityManager.hash(id));
 			} else {
 				Object[] data = identityRepo.findDemoDataById(id).get(0);
 				entity = new IdentityEntity();
