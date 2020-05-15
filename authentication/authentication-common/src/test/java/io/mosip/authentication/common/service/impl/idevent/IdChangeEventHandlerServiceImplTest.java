@@ -72,7 +72,6 @@ public class IdChangeEventHandlerServiceImplTest {
 	
 	@Before
 	public void before() throws IDDataValidationException, RestServiceException {
-		ReflectionTestUtils.setField(idChengeEventHandlerServiceImpl, "mapper", mapper);
 	}
 	
 	@Test
