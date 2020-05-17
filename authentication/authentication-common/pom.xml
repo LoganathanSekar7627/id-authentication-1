@@ -168,7 +168,7 @@
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
 			<artifactId>kernel-cryptomanager-service</artifactId>
-			<version>1.0.9-SNAOSHOT</version>
+			<version>1.0.9-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.security</groupId>
