@@ -3,12 +3,13 @@
 #installs the pkcs11 libraries.
 set -e
 
-echo "Download the client from $artifactory_url_env"
+echo "Download the softhsm client from $artifactory_url_env"
 wget $artifactory_url_env/artifactory/libs-release-local/hsm/client.zip
 echo "Downloaded $artifactory_url_env"
 unzip client.zip
-echo "Attempting to install"
-cd ./client && ./install.sh 
-echo "Installation complete"
+echo "Attempting to install softhsm client"
+cd ./client && ./install.sh
+echo "Installation of softhsm client complete"
 
 exec "$@"
+
