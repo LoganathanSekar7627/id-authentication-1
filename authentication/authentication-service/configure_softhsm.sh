@@ -11,5 +11,3 @@ echo "Attempting to install softhsm client"
 cd ./client && ./install.sh
 echo "Installation of softhsm client complete"
 
-exec "$@"
-
