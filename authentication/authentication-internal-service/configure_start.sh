@@ -1,14 +1,21 @@
 #!/bin/bash
 
-#installs the pkcs11 libraries.
+#installs the pre-requisites.
 set -e
 
-echo "Download the client from $artifactory_url_env"
-wget $artifactory_url_env/artifactory/libs-release-local/hsm/client.zip
-echo "Downloaded $artifactory_url_env"
-unzip client.zip
-echo "Attempting to install"
-cd ./client && ./install.sh 
-echo "Installation complete"
+echo "Downloading pre-requisites install scripts"
+wget --no-check-certificate --no-cache --no-cookies $artifactory_url_env/artifactory/libs-release-local/deployment/docker/id-authentication/configure_biosdk.sh -O configure_biosdk.sh
+wget --no-check-certificate --no-cache --no-cookies $artifactory_url_env/artifactory/libs-release-local/deployment/docker/id-authentication/configure_softhsm.sh -O configure_softhsm.sh
+
+echo "Installating pre-requisites.."
+cd /
+/bin/bash configure_biosdk.sh
+cd /
+/bin/bash configure_softhsm.sh
+
+cd /
+
+echo "Installating pre-requisites completed."
+
 
 exec "$@"
